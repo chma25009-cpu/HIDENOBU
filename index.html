@@ -3,8 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Personal Site</title>
+  <title>HIDENOBU - Personal Site</title>
+  <!-- Marked.js (Markdown表示用) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -13,10 +19,47 @@
       color: #111;
     }
 
+    /* --- ナビゲーションバー (常時上部固定) --- */
+    .navbar {
+      position: sticky;
+      top: 0;
+      background: #111;
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      border-bottom: 1px solid #333;
+    }
+
+    .navbar .logo {
+      font-weight: bold;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 15px;
+    }
+
+    .nav-links a {
+      color: #ccc;
+      text-decoration: none;
+      font-size: 12px;
+      transition: 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+
     header {
       background: #111;
       color: white;
-      padding: 60px 20px;
+      padding: 50px 20px;
       text-align: center;
     }
 
@@ -55,15 +98,189 @@
       color: white;
       cursor: pointer;
       border-radius: 5px;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #333;
     }
 
     .result {
       margin-top: 10px;
       font-weight: bold;
     }
+
+    /* --- 競馬AIセクションのスタイル --- */
+    .keiba-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 768px) {
+      .keiba-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .keiba-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .form-group input, .form-group textarea {
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 13px;
+    }
+
+    .key-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .key-row input {
+      flex: 1;
+    }
+
+    .race-presets {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .race-card {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 8px;
+      cursor: pointer;
+      background: #f9f9f9;
+      transition: 0.2s;
+    }
+
+    .race-card:hover {
+      border-color: #111;
+      background: #f0f0f0;
+    }
+
+    .race-card.active {
+      border-color: #111;
+      background: #111;
+      color: white;
+    }
+
+    .race-card.active .sub {
+      color: #ccc;
+    }
+
+    .race-card .tag {
+      font-size: 9px;
+      padding: 2px 5px;
+      background: #e2e8f0;
+      color: #333;
+      border-radius: 3px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .race-card.active .tag {
+      background: #333;
+      color: white;
+    }
+
+    .race-card .title {
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .race-card .sub {
+      font-size: 10px;
+      color: #666;
+    }
+
+    .btn-generate {
+      width: 100%;
+      padding: 12px;
+      font-weight: bold;
+      font-size: 14px;
+      background: #111;
+    }
+
+    .btn-generate:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+
+    .output-box {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      background: #fdfdfd;
+      min-height: 350px;
+      max-height: 500px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-sub {
+      padding: 4px 8px;
+      font-size: 11px;
+      margin-top: 0;
+    }
+
+    .loading-text {
+      display: none;
+      font-size: 12px;
+      color: #0284c7;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
+
+<!-- ★ ページ上部のナビゲーションバー ★ -->
+<div class="navbar">
+  <div class="logo">HIDENOBU PORTAL</div>
+  <div class="nav-links">
+    <a href="#about">自己紹介</a>
+    <a href="#career">経歴</a>
+    <a href="#quiz">クイズ</a>
+    <a href="#keiba">競馬予想AI</a>
+    <a href="#game">UFOキャッチャー</a>
+    <!-- もし過去の独立したHTMLファイルがあれば、ここに追加できます -->
+    <!-- <a href="keiba_portal.html" target="_blank">独立ポータル版を開く ↗</a> -->
+  </div>
+</div>
 
 <header>
   <img src="image/顔.png" alt="宣材写真" style="width:120px;height:120px;object-fit:cover;border-radius:50%;margin-bottom:20px;" />
@@ -71,26 +288,26 @@
   <p>孤高の男</p>
 </header>
 
-<section>
+<section id="about">
   <h2>自己紹介</h2>
   <p>
     毎日がeveryday
   </p>
 </section>
 
-<section>
+<section id="career">
   <h2>経歴</h2>
   <div class="timeline">
-    <div class="item">2024 - フリーダムフォレスト　入学</div>
-    <div class="item">2025 - アルバイト　開始</div>
-    <div class="item">2026 - 第一種自動車運転免許　取得</div>
+    <div class="item">2024 - フリーダムフォレスト 入学</div>
+    <div class="item">2025 - アルバイト 開始</div>
+    <div class="item">2026 - 第一種自動車運転免許 取得</div>
   </div>
 </section>
 
-<section>
+<section id="quiz">
   <h2>付録クイズ</h2>
   <div class="quiz-box">
-    <p>Q. HIDENOBUが好きな女性アニメチャラは？</p>
+    <p>Q. HIDENOBUが好きな女性アニメキャラは？</p>
     <button onclick="checkAnswer('a')">A. 綱手（NARUTO）</button>
     <button onclick="checkAnswer('b')">B. レム</button>
     <button onclick="checkAnswer('c')">C. マキマ</button>
@@ -98,7 +315,86 @@
   </div>
 </section>
 
+<!-- 競馬予想AI セクション -->
+<section id="keiba">
+  <h2>🏇 競馬予想AI (2026年対応)</h2>
+  <div class="keiba-container">
+    
+    <!-- 左側：入力パネル -->
+    <div class="keiba-panel">
+      <div class="form-group">
+        <label>注目レース選択</label>
+        <div class="race-presets" id="presetContainer"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Gemini API Key</label>
+        <div class="key-row">
+          <input type="password" id="apiKey" placeholder="AIzaSy...">
+          <button style="margin-top:0;" onclick="saveApiKey()">記憶</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>対象レース名</label>
+        <input type="text" id="raceName" readonly style="background:#eee;">
+      </div>
+
+      <div class="form-group">
+        <label>競馬場・コース (自動)</label>
+        <input type="text" id="course" readonly style="background:#eee;">
+      </div>
+
+      <div class="form-group">
+        <label>馬場状態・天気 (自動)</label>
+        <input type="text" id="weatherInfo" readonly style="background:#eee;">
+      </div>
+
+      <div class="form-group">
+        <label>気象庁ピンポイント天気URL</label>
+        <input type="text" id="jmaUrl" readonly style="background:#eee; font-size:11px;">
+      </div>
+
+      <div class="form-group">
+        <label>追加指示 / 注目馬 (任意)</label>
+        <textarea id="notes" rows="2" placeholder="例：追切好調馬を重視"></textarea>
+      </div>
+
+      <button class="btn-generate" id="generateBtn" onclick="runPredictionWithRetry()">🚀 予想記事を自動生成</button>
+      <div class="loading-text" id="loadingStatus">⏳ 2026年現在の出走馬・データを分析中...</div>
+    </div>
+
+    <!-- 右側：出力結果 -->
+    <div class="keiba-panel">
+      <div class="output-header">
+        <label style="font-size: 12px; font-weight: bold; color: #555;">生成結果プレビュー</label>
+        <div class="action-btns">
+          <button class="btn-sub" onclick="copyContent()">📋 コピー</button>
+          <button class="btn-sub" onclick="downloadMarkdown()">💾 .md保存</button>
+        </div>
+      </div>
+      <div class="output-box" id="outputArea">
+        <p style="color:#888; text-align:center; margin-top:120px;">レースを選んで生成ボタンを押してください。</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="game-section">
+  <h2>UFOキャッチャーゲーム</h2>
+
+  <canvas id="game" width="300" height="300"
+    style="border:1px solid #ccc; background:#fff; display:block; margin:0 auto;">
+  </canvas>
+
+  <p style="text-align:center;" id="game">
+    タップ / クリックで掴む・離す
+  </p>
+</section>
+
 <script>
+  // クイズ処理
   function checkAnswer(ans) {
     const result = document.getElementById('result');
     if(ans === 'a') {
@@ -109,129 +405,300 @@
       result.style.color = 'red';
     }
   }
-</script>
-<section>
-  <h2>UFOキャッチャーゲーム</h2>
 
-  <canvas id="game" width="300" height="300"
-    style="border:1px solid #ccc; background:#fff; display:block; margin:0 auto;">
-  </canvas>
+  // --- 競馬AI スクリプト ---
+  const racePresets = [
+    {
+      id: "tenno",
+      tag: "G1 / 2026",
+      title: "2026年 天皇賞（秋）",
+      sub: "東京 芝2000m",
+      course: "東京競馬場 芝2000m（Bコース）",
+      weather: "良馬場想定",
+      jmaUrl: "https://www.jma.go.jp/bosai/forecast/#area_type=class20s&area_code=1320800",
+      notes: "2026年秋の最新有力馬・出走想定馬の情報を網羅すること。"
+    },
+    {
+      id: "japan_cup",
+      tag: "G1 / 2026",
+      title: "2026年 ジャパンカップ",
+      sub: "東京 芝2400m",
+      course: "東京競馬場 芝2400m（Cコース）",
+      weather: "良馬場想定",
+      jmaUrl: "https://www.jma.go.jp/bosai/forecast/#area_type=class20s&area_code=1320800",
+      notes: "2026年現役最強馬決定戦。世界・世代を超えた対決。"
+    },
+    {
+      id: "arima",
+      tag: "G1 / 2026",
+      title: "2026年 有馬記念",
+      sub: "中山 芝2500m",
+      course: "中山競馬場 芝2500m（Aコース）",
+      weather: "良〜稍重想定",
+      jmaUrl: "https://www.jma.go.jp/bosai/forecast/#area_type=class20s&area_code=1220400",
+      notes: "2026年のグランプリ。トリッキーな中山コース適性を重視。"
+    },
+    {
+      id: "kikuka",
+      tag: "G1 / 2026",
+      title: "2026年 菊花賞",
+      sub: "京都 芝3000m",
+      course: "京都競馬場 芝3000m（外回り）",
+      weather: "良馬場想定",
+      jmaUrl: "https://www.jma.go.jp/bosai/forecast/#area_type=class20s&area_code=2610900",
+      notes: "2026年クラシック完結戦。スタミナと折り合い重視。"
+    }
+  ];
 
-  <p style="text-align:center;">
-    タップ / クリックで掴む・離す
-  </p>
-</section>
+  let selectedPreset = null;
+  let rawMarkdownCache = "";
 
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-// --- プレイヤー（クレーン） ---
-let tx = 150, ty = 150;
-let held = null;
-let score = 0;
-
-// --- かご ---
-const basket = {x: 250, y: 250, r: 25};
-
-// --- 景品 ---
-let prizes = [];
-for (let i = 0; i < 10; i++) {
-  prizes.push({
-    x: Math.random() * 260 + 20,
-    y: Math.random() * 260 + 20,
-    state: "free"
+  window.addEventListener('DOMContentLoaded', () => {
+    initPresets();
+    const savedKey = localStorage.getItem("gemini_keiba_api_key");
+    if (savedKey) {
+      document.getElementById("apiKey").value = savedKey;
+    }
   });
-}
 
-// --- マウス / タッチ移動 ---
-function move(e) {
-  const rect = canvas.getBoundingClientRect();
-  const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-  const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-  tx = x;
-  ty = y;
-}
-
-canvas.addEventListener("mousemove", move);
-canvas.addEventListener("touchmove", move);
-
-// --- クリック（掴む / 離す） ---
-canvas.addEventListener("mousedown", grabOrRelease);
-canvas.addEventListener("touchstart", grabOrRelease);
-
-function grabOrRelease() {
-  if (held === null) {
-    for (let i = 0; i < prizes.length; i++) {
-      let p = prizes[i];
-      let d = Math.hypot(tx - p.x, ty - p.y);
-      if (p.state === "free" && d < 20) {
-        p.state = "held";
-        held = i;
-        break;
-      }
-    }
-  } else {
-    prizes[held].state = "free";
-    held = null;
-  }
-}
-
-// --- 描画 ---
-function draw() {
-  ctx.clearRect(0, 0, 300, 300);
-
-  // かご
-  ctx.beginPath();
-  ctx.arc(basket.x, basket.y, basket.r, 0, Math.PI * 2);
-  ctx.stroke();
-
-  ctx.fillText("SCORE: " + score, 10, 20);
-
-  // クレーン
-  ctx.fillRect(tx - 5, ty - 5, 10, 10);
-
-  // 景品
-  prizes.forEach(p => {
-
-    // 掴んでるなら追従
-    if (p.state === "held") {
-      p.x = tx;
-      p.y = ty;
-
-      // ゴール判定
-      let d = Math.hypot(p.x - basket.x, p.y - basket.y);
-      if (d < basket.r) {
-        p.state = "delivered";
-        held = null;
-        score++;
-
-        // 新規追加
-        prizes.push({
-          x: Math.random() * 260 + 20,
-          y: Math.random() * 260 + 20,
-          state: "free"
-        });
-      }
-    }
-
-    // 描画
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
-
-    if (p.state === "delivered") {
-      ctx.fillStyle = "gray";
+  function saveApiKey() {
+    const key = document.getElementById("apiKey").value.trim();
+    if (key) {
+      localStorage.setItem("gemini_keiba_api_key", key);
+      alert("APIキーを保存しました！次回から入力不要です。");
     } else {
-      ctx.fillStyle = "black";
+      localStorage.removeItem("gemini_keiba_api_key");
+      alert("APIキーをクリアしました。");
+    }
+  }
+
+  function initPresets() {
+    const container = document.getElementById("presetContainer");
+    container.innerHTML = "";
+    racePresets.forEach((p, idx) => {
+      const card = document.createElement("div");
+      card.className = "race-card";
+      card.onclick = () => selectRace(idx);
+      card.innerHTML = `
+        <span class="tag">${p.tag}</span>
+        <div class="title">${p.title}</div>
+        <div class="sub">${p.sub}</div>
+      `;
+      container.appendChild(card);
+    });
+    selectRace(0);
+  }
+
+  function selectRace(index) {
+    document.querySelectorAll(".race-card").forEach((c, i) => {
+      if (i === index) c.classList.add("active");
+      else c.classList.remove("active");
+    });
+
+    selectedPreset = racePresets[index];
+    document.getElementById("raceName").value = selectedPreset.title;
+    document.getElementById("course").value = selectedPreset.course;
+    document.getElementById("weatherInfo").value = selectedPreset.weather;
+    document.getElementById("jmaUrl").value = selectedPreset.jmaUrl;
+    document.getElementById("notes").value = selectedPreset.notes;
+  }
+
+  async function runPredictionWithRetry() {
+    const apiKey = document.getElementById("apiKey").value.trim();
+    const btn = document.getElementById("generateBtn");
+    const loading = document.getElementById("loadingStatus");
+    const output = document.getElementById("outputArea");
+
+    if (!apiKey) {
+      alert("Gemini API Key を入力してください。");
+      return;
     }
 
-    ctx.fill();
-  });
+    localStorage.setItem("gemini_keiba_api_key", apiKey);
+    btn.disabled = true;
+    loading.style.display = "block";
 
-  requestAnimationFrame(draw);
-}
+    const maxRetries = 3;
+    let attempt = 0;
+    let success = false;
 
-draw();
+    while (attempt < maxRetries && !success) {
+      attempt++;
+      try {
+        if (attempt > 1) {
+          loading.textContent = `⏳ 混雑中のため再試行中 (${attempt}/${maxRetries}回目)...`;
+          await new Promise(r => setTimeout(r, 3000 * attempt));
+        } else {
+          loading.textContent = "⏳ 2026年の出走馬データを分析中...";
+        }
+
+        await fetchPrediction(apiKey);
+        success = true;
+      } catch (err) {
+        if (attempt === maxRetries) {
+          output.innerHTML = `<p style="color:red;">❌ 通信エラー: ${err.message}<br>時間を置いて再度お試しください。</p>`;
+        }
+      }
+    }
+
+    btn.disabled = false;
+    loading.style.display = "none";
+  }
+
+  async function fetchPrediction(apiKey) {
+    const raceName = document.getElementById("raceName").value;
+    const course = document.getElementById("course").value;
+    const weather = document.getElementById("weatherInfo").value;
+    const jmaUrl = document.getElementById("jmaUrl").value;
+    const notes = document.getElementById("notes").value;
+    const output = document.getElementById("outputArea");
+
+    const prompt = `
+    現在は【2026年】です。プロの競馬予想アナリストとして以下のデータに基づきMarkdown形式で予想記事を作成してください。
+
+    ■ 対象レース: ${raceName}
+    ■ コース: ${course}
+    ■ 天候・馬場: ${weather}
+    ■ 気象庁URL: ${jmaUrl}
+    ■ 特記事項: ${notes}
+
+    【要件】
+    1. **必ず2026年現在の具体出走想定馬の「実名」を複数挙げて評価すること**
+    2. コース・展開の傾向分析
+    3. 本命◎、対抗○、穴馬▲ の理由付き解説
+    4. 推奨買い目と資金配分案
+    5. 記事内に「[気象庁のリアルタイム天気予報はこちら](${jmaUrl})」をリンク挿入
+    6. 記事末尾に自然な競馬投票サイトへの案内文言を入れる
+    `;
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ google_search: {} }]
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message || "APIエラー");
+
+    rawMarkdownCache = data.candidates[0].content.parts[0].text;
+    output.innerHTML = marked.parse(rawMarkdownCache);
+  }
+
+  function copyContent() {
+    if (!rawMarkdownCache) return;
+    navigator.clipboard.writeText(rawMarkdownCache);
+    alert("生成テキストをコピーしました！");
+  }
+
+  function downloadMarkdown() {
+    if (!rawMarkdownCache) return;
+    const blob = new Blob([rawMarkdownCache], { type: "text/markdown;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `keiba_${selectedPreset.id}_2026.md`;
+    link.click();
+  }
+
+  // --- クレーンゲーム スクリプト ---
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+
+  let tx = 150, ty = 150;
+  let held = null;
+  let score = 0;
+
+  const basket = {x: 250, y: 250, r: 25};
+
+  let prizes = [];
+  for (let i = 0; i < 10; i++) {
+    prizes.push({
+      x: Math.random() * 260 + 20,
+      y: Math.random() * 260 + 20,
+      state: "free"
+    });
+  }
+
+  function move(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    tx = x;
+    ty = y;
+  }
+
+  canvas.addEventListener("mousemove", move);
+  canvas.addEventListener("touchmove", move);
+  canvas.addEventListener("mousedown", grabOrRelease);
+  canvas.addEventListener("touchstart", grabOrRelease);
+
+  function grabOrRelease() {
+    if (held === null) {
+      for (let i = 0; i < prizes.length; i++) {
+        let p = prizes[i];
+        let d = Math.hypot(tx - p.x, ty - p.y);
+        if (p.state === "free" && d < 20) {
+          p.state = "held";
+          held = i;
+          break;
+        }
+      }
+    } else {
+      prizes[held].state = "free";
+      held = null;
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, 300, 300);
+
+    ctx.beginPath();
+    ctx.arc(basket.x, basket.y, basket.r, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillText("SCORE: " + score, 10, 20);
+
+    ctx.fillRect(tx - 5, ty - 5, 10, 10);
+
+    prizes.forEach(p => {
+      if (p.state === "held") {
+        p.x = tx;
+        p.y = ty;
+
+        let d = Math.hypot(p.x - basket.x, p.y - basket.y);
+        if (d < basket.r) {
+          p.state = "delivered";
+          held = null;
+          score++;
+
+          prizes.push({
+            x: Math.random() * 260 + 20,
+            y: Math.random() * 260 + 20,
+            state: "free"
+          });
+        }
+      }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+
+      if (p.state === "delivered") {
+        ctx.fillStyle = "gray";
+      } else {
+        ctx.fillStyle = "black";
+      }
+
+      ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
 </script>
 </body>
 </html>
